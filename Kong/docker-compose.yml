@@ -1,0 +1,78 @@
+networks:
+  kong-net:
+    driver: bridge
+
+volumes:
+  kong-database:
+    name: kong-database
+
+services:
+  kong-database:
+    image: postgres:13
+    container_name: kong-database
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: kong
+      POSTGRES_PASSWORD: kong
+      POSTGRES_DB: kong
+    volumes:
+      - kong-database:/var/lib/postgresql/data
+    networks:
+      - kong-net
+
+  kong-migration:
+    image: kong:latest
+    container_name: kong-migration
+    restart: "no"
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-database
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: kong
+      KONG_CASSANDRA_CONTACT_POINTS: kong-database
+    command: kong migrations bootstrap
+    networks:
+      - kong-net
+
+  kong:
+    image: kong:latest
+    container_name: kong
+    restart: unless-stopped
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-database
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: kong
+      KONG_PG_DATABASE: kong
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+    ports:
+      - "8000:8000"
+      - "8443:8443"
+      - "8001:8001"
+    networks:
+      - kong-net
+
+  konga-prepare:
+    image: pantsel/konga:latest
+    container_name: konga-prepare
+    restart: "no"
+    command: "-c prepare -a postgres -u postgres://kong:kong@kong-database:5432/kong"
+    networks:
+      - kong-net
+
+  konga:
+    image: pantsel/konga:latest
+    container_name: konga
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DB_ADAPTER: postgres
+      DB_URI: postgres://kong:kong@kong-database:5432/kong
+    ports:
+      - "1337:1337"
+    networks:
+      - kong-net

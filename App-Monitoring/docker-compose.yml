@@ -27,7 +27,7 @@ services:
       - "3100:3100"
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
-      - ./etc/loki-config.yaml:/etc/loki/local-config.yaml
+      - ./configs/loki-config.yaml:/etc/loki/local-config.yaml
       - ./data/loki:/loki
 
   prometheus:
@@ -36,7 +36,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./etc/prometheus-config.yaml:/etc/prometheus/prometheus.yml
+      - ./configs/prometheus-config.yaml:/etc/prometheus/prometheus.yml
 
   jaeger:
     image: jaegertracing/all-in-one:latest
