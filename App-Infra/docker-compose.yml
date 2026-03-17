@@ -20,6 +20,18 @@ services:
       - "1025:1025"
       - "8025:8025"
 
+  seq:
+    image: datalust/seq:latest
+    container_name: seq
+    restart: unless-stopped
+    ports:
+      - "5341:5341"
+      - "80:80"
+    volumes:
+      - seq_data:/data
+
 volumes:
   rabbitmq_data:
     name: rabbitmq
+  seq_data:
+    name: seq
