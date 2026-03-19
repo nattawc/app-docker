@@ -25,8 +25,7 @@ services:
     container_name: seq
     restart: unless-stopped
     ports:
-      - "5341:5341"
-      - "80:80"
+      - "5341:80"
     volumes:
       - seq_data:/data
 
@@ -36,6 +35,19 @@ services:
     restart: unless-stopped
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  redisinsight:
+    image: redislabs/redisinsight:latest
+    container_name: redisinsight
+    restart: unless-stopped
+    ports:
+      - "5540:5540"
+    environment:
+      NODE_OPTIONS: "--no-deprecation"
+    volumes:
+      - redisinsight_data:/data
 
 volumes:
   rabbitmq_data:
@@ -44,3 +56,5 @@ volumes:
     name: seq
   redis_data:
     name: redis
+  redisinsight_data:
+    name: redisinsight
