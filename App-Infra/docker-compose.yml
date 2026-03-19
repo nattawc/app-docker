@@ -30,8 +30,17 @@ services:
     volumes:
       - seq_data:/data
 
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
 volumes:
   rabbitmq_data:
     name: rabbitmq
   seq_data:
     name: seq
+  redis_data:
+    name: redis
